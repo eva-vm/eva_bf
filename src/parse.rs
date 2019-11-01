@@ -1,27 +1,28 @@
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum Command {
-    Inc,
-    Dec,
-    Shift,
-    Unshift,
+    Inc(usize),
+    Dec(usize),
+    Shift(usize),
+    Unshift(usize),
     Input,
     Output,
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub enum Program {
     Command(Command),
-    Commands(Box<Vec<Program>>),
+    Sequence(Box<Vec<Program>>),
+    Program(Box<Vec<Program>>)
 }
 
 peg::parser! {
     grammar brainfuck() for str {
         use super::{Command, Program};
         rule ignore() = quiet!{[' ' | '\t' | '\n']}
-        rule inc()      -> Command = "+" {Command::Inc}
-        rule dec()      -> Command = "-" {Command::Dec}
-        rule shift()    -> Command = ">" {Command::Shift}
-        rule unshift()  -> Command = "<" {Command::Unshift}
+        rule inc()      -> Command = v:$("+"+) {Command::Inc(v.len())}
+        rule dec()      -> Command = v:$("-"+) {Command::Dec(v.len())}
+        rule shift()    -> Command = v:$(">"+) {Command::Shift(v.len())}
+        rule unshift()  -> Command = v:$("<"+) {Command::Unshift(v.len())}
         rule input()    -> Command = "," {Command::Input}
         rule output()   -> Command = "." {Command::Output}
 
@@ -29,10 +30,10 @@ peg::parser! {
             Program::Command(c)
         }
         rule lop()      -> Program = "[" l:(command() / lop())+ "]" {
-            Program::Commands(Box::from(l))
+            Program::Sequence(Box::from(l))
         }
 
-        pub rule program() -> Program = p:(command() / lop())* { Program::Commands(Box::from(p)) }
+        pub rule program() -> Program = p:(command() / lop())* { Program::Program(Box::from(p)) }
     }
 }
 
