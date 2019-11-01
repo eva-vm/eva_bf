@@ -18,17 +18,17 @@ peg::parser! {
     grammar brainfuck() for str {
         use super::{Command, Program};
         rule ignore() = quiet!{[' ' | '\t' | '\n']}
-        rule inc() -> Command = "+" { Command::Inc }
-        rule dec() -> Command = "-" {Command::Dec}
-        rule shift() -> Command = ">" {Command::Shift}
-        rule unshift() -> Command = "<" {Command::Unshift}
-        rule input() -> Command = "," {Command::Input}
-        rule output() -> Command = "." {Command::Output}
+        rule inc()      -> Command = "+" {Command::Inc}
+        rule dec()      -> Command = "-" {Command::Dec}
+        rule shift()    -> Command = ">" {Command::Shift}
+        rule unshift()  -> Command = "<" {Command::Unshift}
+        rule input()    -> Command = "," {Command::Input}
+        rule output()   -> Command = "." {Command::Output}
 
-        rule command() -> Program = c:(inc() / dec() / shift() / unshift() / input() / output()) {
+        rule command()  -> Program = c:(inc() / dec() / shift() / unshift() / input() / output()) {
             Program::Command(c)
         }
-        rule lop() -> Program = "[" l:(command() / lop())+ "]" {
+        rule lop()      -> Program = "[" l:(command() / lop())+ "]" {
             Program::Commands(Box::from(l))
         }
 
