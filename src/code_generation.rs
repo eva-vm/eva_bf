@@ -4,33 +4,34 @@ use crate::parse::{Program, Command};
 
 pub fn generate<W: Write>(prog: &Program, buf: &mut W) -> io::Result<()> {
   writeln!(buf, "MOV R0, #{}", calc_offset(prog));
-  generate_code(prog, buf, 0);
+  generate_code(prog, buf, 0)
 }
 
 fn calc_offset(prog: &Program) -> usize {
   match prog {
-  Program::Command(Command::Shift)   => 1,
-  Program::Command(Command::Unshift) => 1,
-  Program::Command(Command::Inc)    => 3,
-  Program::Command(Command::Dec)    => 3,
-  Program::Sequence(s)      => {
-      let off = 0;
-      for p in *s {
-        off += calc_offset(p);
-      }
-      return off;
+  Program::Command(Command::Shift)    => 1,
+  Program::Command(Command::Unshift)  => 1,
+  Program::Command(Command::Inc)      => 3,
+  Program::Command(Command::Dec)      => 3,
+  Program::Command(_)                 => 0,
+  Program::Sequence(s) => {
+      s.iter().map(calc_offset).fold(0, |acc, v| acc + v)
     }
   }
 }
 
 fn generate_code<W: Write>(prog: &Program, buf: &mut W, i: u8) -> io::Result<()> {
   match prog {
-    Program::Command(c) => write_asm_for_command(c, buf),
-    Program::Sequence(s) => for p in *s {
-      let label = format!("label_{}:", i);
-      generate_code(p, buf, i+1);
-      writeln!(buf, "\tCMP\tR0, #0")?;
-      writeln!(buf, "\tBNEQ {}", label);
+    Program::Command(c)  => write_asm_for_command(c, buf),
+    Program::Sequence(s) => {
+      let label = format!("label_{}", i);
+      writeln!(buf, "\n{}:", label)?;
+      for p in s.iter() {
+        generate_code(p, buf, i+1);
+        writeln!(buf, "\tCMP\tR0, #0")?;
+        writeln!(buf, "\tBNEQ {}", label)?;
+      }
+      Ok(())
     }
   }
 }

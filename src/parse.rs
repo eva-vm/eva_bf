@@ -8,7 +8,7 @@ pub enum Command {
     Output,
 }
 // COUCOU!
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub enum Program {
     Command(Command),
     Sequence(Box<Vec<Program>>),

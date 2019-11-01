@@ -2,7 +2,15 @@ mod parse;
 mod code_generation;
 
 fn main() {
-    let tree = parse::parse("++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.");
-    println!("{:?}", tree);
-    // code_generation::generate(tree, &mut std::io::stdout());
+    let parsing_result = parse::parse("++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.");
+    match parsing_result {
+        Ok(p) => {
+            eprintln!("{:?}", p);
+            match code_generation::generate(&p, &mut std::io::stdout()) {
+              Ok(()) => eprintln!("✅ Done."),
+              Err(_) => eprintln!("❌ Ouput Error while generating the code."),
+            }
+        },
+        Err(err) => eprintln!("Parsing error at {}", err),
+    }
 }
