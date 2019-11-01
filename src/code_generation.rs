@@ -1,0 +1,57 @@
+use std::io::{self, Write};
+use crate::parse::{Program, Command};
+
+
+pub fn generate<W: Write>(prog: &Program, buf: &mut W) -> io::Result<()> {
+  writeln!(buf, "MOV R0, #{}", calc_offset(prog));
+  generate_code(prog, buf, 0);
+}
+
+fn calc_offset(prog: &Program) -> usize {
+  match prog {
+  Program::Command(Command::Shift)   => 1,
+  Program::Command(Command::Unshift) => 1,
+  Program::Command(Command::Inc)    => 3,
+  Program::Command(Command::Dec)    => 3,
+  Program::Sequence(s)      => {
+      let off = 0;
+      for p in *s {
+        off += calc_offset(p);
+      }
+      return off;
+    }
+  }
+}
+
+fn generate_code<W: Write>(prog: &Program, buf: &mut W, i: u8) -> io::Result<()> {
+  match prog {
+    Program::Command(c) => write_asm_for_command(c, buf),
+    Program::Sequence(s) => for p in *s {
+      let label = format!("label_{}:", i);
+      generate_code(p, buf, i+1);
+      writeln!(buf, "\tCMP\tR0, #0")?;
+      writeln!(buf, "\tBNEQ {}", label);
+    }
+  }
+}
+
+fn write_asm_for_command<W: Write>(cmd: &Command, buf: &mut W) -> io::Result<()> {
+  match cmd {
+    Command::Inc      => {
+      writeln!(buf, "\tLDR R1, [R0]")?;
+      writeln!(buf, "\tADD R1, #1")?;
+      writeln!(buf, "\tSTR R1, [R0]")?;
+      Ok(()) // equivalent to return Ok(());
+    },
+    Command::Dec      => {
+      writeln!(buf, "\tLDR R1, [R0]")?;
+      writeln!(buf, "\tSUB R1, #1")?;
+      writeln!(buf, "\tSTR R1, [R0]");
+      Ok(())
+    }
+    Command::Shift    => writeln!(buf, "\tADD R0, #1"),
+    Command::Unshift  => writeln!(buf, "\tSUB R0, #1"),
+    Command::Input    => Ok(()),
+    Command::Output   => Ok(()),
+  }
+}

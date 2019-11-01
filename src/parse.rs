@@ -7,11 +7,11 @@ pub enum Command {
     Input,
     Output,
 }
-
+// COUCOU!
 #[derive(Debug)]
 pub enum Program {
     Command(Command),
-    Commands(Box<Vec<Program>>),
+    Sequence(Box<Vec<Program>>),
 }
 
 peg::parser! {
@@ -29,10 +29,10 @@ peg::parser! {
             Program::Command(c)
         }
         rule lop()      -> Program = "[" l:(command() / lop())+ "]" {
-            Program::Commands(Box::from(l))
+            Program::Sequence(Box::from(l))
         }
 
-        pub rule program() -> Program = p:(command() / lop())* { Program::Commands(Box::from(p)) }
+        pub rule program() -> Program = p:(command() / lop())* { Program::Sequence(Box::from(p)) }
     }
 }
 
