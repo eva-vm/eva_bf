@@ -8,7 +8,7 @@ pub enum Command {
 	Output,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Program {
 	Command(Command),
 	Sequence(Box<Vec<Program>>),
@@ -39,4 +39,25 @@ peg::parser! {
 
 pub fn parse(input: &str) -> Result<Program, peg::error::ParseError<peg::str::LineCol>> {
 	brainfuck::program(input)
+}
+
+#[cfg(test)]
+mod tests {
+	use super::parse;
+	use super::{Command, Program};
+
+	#[test]
+	fn parses() {
+		let input = "+++-[>-.]";
+		let expected = Program::Program(Box::new(vec![
+			Program::Command(Command::Inc(3)),
+			Program::Command(Command::Dec(1)),
+			Program::Sequence(Box::new(vec![
+				Program::Command(Command::Shift(1)),
+				Program::Command(Command::Dec(1)),
+				Program::Command(Command::Output),
+			])),
+		]));
+		assert_eq!(Ok(expected), parse(input));
+	}
 }
