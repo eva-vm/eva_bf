@@ -18,7 +18,7 @@ pub enum Program {
 peg::parser! {
 	grammar brainfuck() for str {
 		use super::{Command, Program};
-		rule ignore() = quiet!{[' ' | '\t' | '\n']+}
+		rule ws() = quiet!{(" " / "\t" / "\n")*}
 		rule inc()      -> Command = v:$("+"+) {Command::Inc(v.len())}
 		rule dec()      -> Command = v:$("-"+) {Command::Dec(v.len())}
 		rule shift()    -> Command = v:$(">"+) {Command::Shift(v.len())}
@@ -26,14 +26,14 @@ peg::parser! {
 		rule input()    -> Command = "," {Command::Input}
 		rule output()   -> Command = "." {Command::Output}
 
-		rule command()  -> Program = c:(inc() / dec() / shift() / unshift() / input() / output()) {
+		rule command()  -> Program = ws() c:(inc() / dec() / shift() / unshift() / input() / output()) ws() {
 			Program::Command(c)
 		}
-		rule lop()      -> Program = "[" l:(command() / lop())+ "]" {
+		rule lop()      -> Program = ws() "["  ws() l:(command() / lop())+ ws() "]" ws() {
 			Program::Sequence(Box::from(l))
 		}
 
-		pub rule program() -> Program = p:(command() / lop())* { Program::Program(Box::from(p)) }
+		pub rule program() -> Program = ws() p:(command() / lop())+ ws() { Program::Program(Box::from(p)) }
 	}
 }
 
