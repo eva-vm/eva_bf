@@ -30,7 +30,7 @@ fn calc_offset(prog: &Program) -> usize {
     Program::Command(Command::Dec(_))          => 3,
     Program::Command(_)                        => 0,
     Program::Sequence(s) => {
-      s.iter().map(calc_offset).fold(0, |acc, v| acc + v) +3
+      s.iter().map(calc_offset).fold(0, |acc, v| acc + v) +8
     }
     Program::Program(s) => {
       s.iter().map(calc_offset).fold(0, |acc, v| acc + v)
@@ -44,18 +44,19 @@ fn generate_code<W: Write>(prog: &Program, buf: &mut W, i: usize) -> io::Result<
     Program::Sequence(s) => {
       let label = format!("label_{}", i);
       let label_out = format!("label_{}_out", i);
+      let mut nlabels = 1usize;
       writeln!(buf, "\tLDR\tR1, [R0]")?;
       writeln!(buf, "\tCMP\tR1, #0")?;
-      writeln!(buf, "\tBEQ\t{}", label_out)?;
-      let mut nlabels = 1usize;
+      writeln!(buf, "\tLDR\tR1, {}", label_out)?;
+      writeln!(buf, "\tBEQ\tR1")?;
       writeln!(buf, "\n{}:", label)?;
       for p in s.iter() {
         nlabels += generate_code(p, buf, i+nlabels)?;
       }
-
       writeln!(buf, "\tLDR\tR1, [R0]")?;
       writeln!(buf, "\tCMP\tR1, #0")?;
-      writeln!(buf, "\tBNEQ\t{}", label)?;
+      writeln!(buf, "\tLDR\tR1, {}", label)?;
+      writeln!(buf, "\tBNEQ\tR1")?;
       writeln!(buf, "\n{}:", label_out)?;
       Ok(nlabels)
     },
