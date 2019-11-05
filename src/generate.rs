@@ -1,23 +1,29 @@
 use crate::parse::{Command, Program};
 use std::io::{self, Write};
 
-pub fn generate<W: Write>(prog: &Program, buf: &mut W) -> io::Result<usize> {
-	writeln!(
-		buf,
-		" ;----------------------------------------------------\n \
-		 ;- This code has been generated with eva_bf {:8}-    \n \
-		 ;-                                                  -\n \
-		 ;- Authors:                                         -\n \
-		 ;-                                                  -\n \
-		 ;- Nathan Graule <solarliner@gmail.com>             -\n \
-		 ;- Arthur Correnson <arthur.correnson@gmail.com>    -\n \
-		 ;----------------------------------------------------\n",
-		crate::VERSION.unwrap_or("unstable")
-	)?;
+pub fn generate<W: Write>(prog: &Program, buf: &mut W, quiet: bool) -> io::Result<usize> {
+	if !quiet {
+		writeln!(
+			buf,
+			" ;----------------------------------------------------\n \
+			 ;- This code has been generated with eva_bf {:8}-    \n \
+			 ;-                                                  -\n \
+			 ;- Authors:                                         -\n \
+			 ;-                                                  -\n \
+			 ;- Nathan Graule <solarliner@gmail.com>             -\n \
+			 ;- Arthur Correnson <arthur.correnson@gmail.com>    -\n \
+			 ;----------------------------------------------------\n",
+			crate::VERSION.unwrap_or("unstable")
+		)?;
+	}
 	let offset = calc_offset(prog);
-	writeln!(buf, "; Data pointer initialisation\n")?;
+	if !quiet {
+		writeln!(buf, "; Data pointer initialisation\n")?;
+	}
 	writeln!(buf, "\tMOV\tR0, #{}", offset)?;
-	writeln!(buf, "\n; Main program")?;
+	if !quiet {
+		writeln!(buf, "\n; Main program")?;
+	}
 	generate_code(prog, buf, 0)
 }
 

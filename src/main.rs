@@ -32,6 +32,12 @@ fn main() {
 				.multiple(true)
 				.help("Sets the level of verbosity"),
 		)
+		.arg(
+			Arg::with_name("quiet")
+				.short("q")
+				.long("quiet")
+				.help("Don't include comments in generated assembly"),
+		)
 		.arg(Arg::with_name("asm").short("a").long("assemble"))
 		.get_matches();
 	if matches.is_present("asm") {
@@ -49,7 +55,7 @@ fn main() {
 						parse::parse(&inbuf).map_err(|err| format!("Couldn't parse input: {}", err))
 					})
 					.and_then(|ast| {
-						generate::generate(&ast, &mut output)
+						generate::generate(&ast, &mut output, matches.is_present("quiet"))
 							.map_err(|err| format!("Couldn't generate assembly: {}", err))
 					});
 				match res {
@@ -75,7 +81,7 @@ fn main() {
 							.map_err(|err| format!("Couldn't parse input: {}", err))
 					})
 					.and_then(|ast| {
-						generate::generate(&ast, &mut temp_asm)
+						generate::generate(&ast, &mut temp_asm, true)
 							.map_err(|err| format!("Couldn't generate assembly: {}", err))
 					})
 					.and_then(|_| {
@@ -94,7 +100,7 @@ fn main() {
 					});
 				match res {
 					Err(e) => eprintln!("❌ Generation error: {}", e),
-					Ok(size) => eprintln!("✔ Done ({} bytes).", size),
+					Ok(_) => eprintln!("✔ Done."),
 				}
 			}
 		}
