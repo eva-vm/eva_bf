@@ -1,8 +1,5 @@
+use crate::parse::{Command, Program};
 use std::io::{self, Write};
-use crate::parse::{Program, Command};
-
-const VERSION: Option<&'static str> = option_env!("CARGO_PKG_VERSION");
-
 
 pub fn generate<W: Write>(prog: &Program, buf: &mut W) -> io::Result<usize> {
 	writeln!(

@@ -1,5 +1,5 @@
 use std::io::Seek;
-use std::io::{Cursor, Read, Write};
+use std::io::{Cursor, Read};
 
 use clap::{App, Arg};
 use wbuf::{Input, Output};
