@@ -79,11 +79,16 @@ fn main() {
 							.map_err(|err| format!("Couldn't generate assembly: {}", err))
 					})
 					.and_then(|_| {
+						input_buffer.clear();
 						temp_asm
 							.read_to_string(&mut input_buffer)
 							.map_err(|e| format!("ASM read error: {}", e))
 					})
-					.and_then(|_| evasm::assemble(&input_buffer, &mut output));
+					.and_then(|_| {
+						println!("Debug: temp_asm\n{}", input_buffer);
+						evasm::assemble(&input_buffer, &mut output)
+							.map_err(|e| format!("Couldn't assemble: {}", e))
+					});
 				match res {
 					Err(e) => eprintln!("❌ Generation error: {}", e),
 					Ok(size) => eprintln!("✔ Done ({} bytes).", size),
