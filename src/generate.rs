@@ -94,11 +94,13 @@ fn write_asm_for_command<W: Write>(cmd: &Command, buf: &mut W) -> io::Result<usi
 			Ok(0)
 		}
 		Command::Input => {
-			writeln!(buf, "\tIN\tR0")?;
+			writeln!(buf, "\tIN\tR1")?;
+			writeln!(buf, "\tSTR\tR1, [R0]")?;
 			Ok(0)
 		}
 		Command::Output => {
-			writeln!(buf, "\tOUT\tR0")?;
+			writeln!(buf, "\tLDR\tR1, [R0]")?;
+			writeln!(buf, "\tOUT\tR1")?;
 			Ok(0)
 		}
 	}
