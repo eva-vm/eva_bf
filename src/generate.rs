@@ -20,7 +20,7 @@ pub fn generate<W: Write>(prog: &Program, buf: &mut W, quiet: bool) -> io::Resul
 	if !quiet {
 		writeln!(buf, "; Data pointer initialisation\n")?;
 	}
-	writeln!(buf, "\tMOV\tR0, #{}", offset)?;
+	writeln!(buf, "\tMOV\tR0, #{}", offset + 5)?; // With padding
 	if !quiet {
 		writeln!(buf, "\n; Main program")?;
 	}
@@ -33,7 +33,8 @@ fn calc_offset(prog: &Program) -> usize {
 		Program::Command(Command::Unshift(_)) => 1,
 		Program::Command(Command::Inc(_)) => 3,
 		Program::Command(Command::Dec(_)) => 3,
-		Program::Command(_) => 0,
+		Program::Command(Command::Input) => 2,
+		Program::Command(Command::Output) => 2,
 		Program::Sequence(s) => s.iter().map(calc_offset).fold(0, |acc, v| acc + v) + 8,
 		Program::Program(s) => s.iter().map(calc_offset).fold(0, |acc, v| acc + v),
 	}
