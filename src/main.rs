@@ -1,3 +1,4 @@
+use std::io::Seek;
 use std::io::{Cursor, Read, Write};
 
 use clap::{App, Arg};
@@ -45,12 +46,11 @@ fn main() {
 					.read_to_string(&mut inbuf)
 					.map_err(|err| format!("Couldn't read input: {}", err))
 					.and_then(|_| {
-						parse::parse(&inbuf)
-							.map_err(|err| format!("Couldn't parse input: {}", err))
-							.and_then(|ast| {
-								generate::generate(&ast, &mut output)
-									.map_err(|err| format!("Couldn't generate assembly: {}", err))
-							})
+						parse::parse(&inbuf).map_err(|err| format!("Couldn't parse input: {}", err))
+					})
+					.and_then(|ast| {
+						generate::generate(&ast, &mut output)
+							.map_err(|err| format!("Couldn't generate assembly: {}", err))
 					});
 				match res {
 					Ok(size) => eprintln!("✔ Done ({} bytes).", size),
@@ -80,6 +80,9 @@ fn main() {
 					})
 					.and_then(|_| {
 						input_buffer.clear();
+						temp_asm
+							.seek(std::io::SeekFrom::Start(0))
+							.map_err(|e| format!("Couldn't seek back to beginning: {}", e))?;
 						temp_asm
 							.read_to_string(&mut input_buffer)
 							.map_err(|e| format!("ASM read error: {}", e))
