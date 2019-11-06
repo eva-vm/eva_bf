@@ -49,7 +49,7 @@ fn generate_code<W: Write>(prog: &Program, buf: &mut W, i: usize) -> io::Result<
 			let mut nlabels = 1usize;
 			writeln!(buf, "\tLDR\tR1, [R0]")?;
 			writeln!(buf, "\tCMP\tR1, #0")?;
-			writeln!(buf, "\tLDR\tR1, {}", label_out)?;
+			writeln!(buf, "\tMOV\tR1, {}", label_out)?;
 			writeln!(buf, "\tBEQ\tR1")?;
 			writeln!(buf, "\n{}:", label)?;
 			for p in s.iter() {
@@ -57,7 +57,7 @@ fn generate_code<W: Write>(prog: &Program, buf: &mut W, i: usize) -> io::Result<
 			}
 			writeln!(buf, "\tLDR\tR1, [R0]")?;
 			writeln!(buf, "\tCMP\tR1, #0")?;
-			writeln!(buf, "\tLDR\tR1, {}", label)?;
+			writeln!(buf, "\tMOV\tR1, {}", label)?;
 			writeln!(buf, "\tBNEQ\tR1")?;
 			writeln!(buf, "\n{}:", label_out)?;
 			Ok(nlabels)

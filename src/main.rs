@@ -59,7 +59,7 @@ fn main() {
 							.map_err(|err| format!("Couldn't generate assembly: {}", err))
 					});
 				match res {
-					Ok(size) => eprintln!("✔ Done ({} bytes).", size),
+					Ok(_) => eprintln!("✔ Done."),
 					Err(e) => eprintln!("❌ Assembly error: {}", e),
 				}
 			}
