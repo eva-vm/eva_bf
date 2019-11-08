@@ -11,3 +11,14 @@ evasm = {git = "https://github.com/solarliner/rs-evasm", tag = "0.2.1"}
 clap = "2.33.0"
 peg = "0.6.0"
 wbuf = "0.1.1"
+
+[dev-dependencies]
+criterion = "0.3.0"
+
+[[bin]]
+path = "src/bin/main.rs"
+name = "evabf"
+
+[[bench]]
+name = "parse"
+harness = false
