@@ -1,13 +1,7 @@
-use std::io::Seek;
-use std::io::{Cursor, Read};
-
 use clap::{App, Arg};
+use evabf::{generate, parse, VERSION};
+use std::io::{Cursor, Read, Seek};
 use wbuf::{Input, Output};
-
-mod generate;
-mod parse;
-
-pub const VERSION: Option<&'static str> = option_env!("CARGO_PKG_VERSION");
 
 fn main() {
 	let matches = App::new("Eva Brainfuck compiler")
@@ -38,7 +32,7 @@ fn main() {
 				.long("quiet")
 				.help("Don't include comments in generated assembly"),
 		)
-		.arg(Arg::with_name("asm").short("a").long("assemble"))
+		.arg(Arg::with_name("asm").short("a").long("asm"))
 		.get_matches();
 	if matches.is_present("asm") {
 		let input_file = Input::from_arg(matches.value_of("INPUT"));
@@ -52,10 +46,10 @@ fn main() {
 					.read_to_string(&mut inbuf)
 					.map_err(|err| format!("Couldn't read input: {}", err))
 					.and_then(|_| {
-						parse::parse(&inbuf).map_err(|err| format!("Couldn't parse input: {}", err))
+						parse(&inbuf).map_err(|err| format!("Couldn't parse input: {}", err))
 					})
 					.and_then(|ast| {
-						generate::generate(&ast, &mut output, matches.is_present("quiet"))
+						generate(&ast, &mut output, matches.is_present("quiet"))
 							.map_err(|err| format!("Couldn't generate assembly: {}", err))
 					});
 				match res {
@@ -77,11 +71,11 @@ fn main() {
 					.read_to_string(&mut input_buffer)
 					.map_err(|err| format!("Couldn't read input: {}", err))
 					.and_then(|_| {
-						parse::parse(&input_buffer)
+						evabf::parse(&input_buffer)
 							.map_err(|err| format!("Couldn't parse input: {}", err))
 					})
 					.and_then(|ast| {
-						generate::generate(&ast, &mut temp_asm, true)
+						evabf::generate(&ast, &mut temp_asm, true)
 							.map_err(|err| format!("Couldn't generate assembly: {}", err))
 					})
 					.and_then(|_| {

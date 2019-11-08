@@ -16,17 +16,19 @@ pub fn generate<W: Write>(prog: &Program, buf: &mut W, quiet: bool) -> io::Resul
 			crate::VERSION.unwrap_or("unstable")
 		)?;
 	}
-	let offset = calc_offset(prog);
+	// let offset = calc_offset(prog);
+	let offset = 15000; // Constant offset in memory
 	if !quiet {
 		writeln!(buf, "; Data pointer initialisation\n")?;
 	}
-	writeln!(buf, "\tMOV\tR0, #{}", offset + 5)?; // With padding
+	writeln!(buf, "\tMOV\tR0, #{}", offset)?;
 	if !quiet {
 		writeln!(buf, "\n; Main program")?;
 	}
 	generate_code(prog, buf, 0)
 }
 
+#[allow(dead_code)]
 fn calc_offset(prog: &Program) -> usize {
 	match prog {
 		Program::Command(Command::Shift(_)) => 1,
