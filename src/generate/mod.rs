@@ -1,6 +1,8 @@
 use crate::parse::{Command, Program};
 use std::io::{self, Write};
 
+mod optimizations;
+
 pub fn generate<W: Write>(prog: &Program, buf: &mut W, quiet: bool) -> io::Result<usize> {
 	if !quiet {
 		writeln!(
