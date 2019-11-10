@@ -30,6 +30,7 @@ pub fn generate<W: Write>(prog: &Program, buf: &mut W, quiet: bool) -> io::Resul
 
 #[allow(dead_code)]
 fn calc_offset(prog: &Program) -> usize {
+	#[rustfmt::skip]
 	fn step(com: &Command) -> usize {
 		match &*com {
 			Command::Shift(_) 	=> 1,
@@ -52,7 +53,7 @@ fn generate_code<W: Write>(prog: &Program, buf: &mut W) -> io::Result<usize> {
 	Ok(nlabels)
 }
 
-fn write_asm_for_command<W: Write>(cmd: &Command, buf: &mut W, i : usize) -> io::Result<usize> {
+fn write_asm_for_command<W: Write>(cmd: &Command, buf: &mut W, i: usize) -> io::Result<usize> {
 	match cmd {
 		Command::Inc(n) => {
 			writeln!(buf, "\tLDR\tR1, [R0]")?;
@@ -84,7 +85,7 @@ fn write_asm_for_command<W: Write>(cmd: &Command, buf: &mut W, i : usize) -> io:
 			writeln!(buf, "\tOUT\tR1")?;
 			Ok(0)
 		}
-		Command::Loop(seq)	=> {
+		Command::Loop(seq) => {
 			let label = format!("label_{}", i);
 			let label_out = format!("label_{}_out", i);
 			let mut nlabels = 1usize;

@@ -41,7 +41,7 @@ pub fn parse(input: &str) -> Result<Program, peg::error::ParseError<peg::str::Li
 #[cfg(test)]
 mod tests {
 	use super::parse;
-	use super::{Command};
+	use super::Command;
 
 	#[test]
 	fn parses() {
@@ -49,11 +49,7 @@ mod tests {
 		let expected = vec![
 			Command::Inc(3),
 			Command::Dec(1),
-			Command::Loop(vec![
-				Command::Shift(1),
-				Command::Dec(1),
-				Command::Output,
-			]),
+			Command::Loop(vec![Command::Shift(1), Command::Dec(1), Command::Output]),
 		];
 		assert_eq!(Ok(expected), parse(input));
 	}
