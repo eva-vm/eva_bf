@@ -1,19 +1,15 @@
-#[derive(Copy, Clone, Eq, PartialEq, Debug)]
+#[derive(Clone, Eq, PartialEq, Debug)]
 pub enum Command {
 	Inc(usize),
 	Dec(usize),
 	Shift(usize),
 	Unshift(usize),
+	Loop(Box<Vec<Command>>),
 	Input,
 	Output,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub enum Program {
-	Command(Command),
-	Sequence(Box<Vec<Program>>),
-	Program(Box<Vec<Program>>),
-}
+pub type Program = Box<Vec<Command>>;
 
 peg::parser! {
 	grammar brainfuck() for str {
@@ -26,14 +22,15 @@ peg::parser! {
 		rule input()    -> Command = "," {Command::Input}
 		rule output()   -> Command = "." {Command::Output}
 
-		rule command()  -> Program = ws() c:(inc() / dec() / shift() / unshift() / input() / output()) ws() {
-			Program::Command(c)
-		}
-		rule lop()      -> Program = ws() "["  ws() l:(command() / lop())+ ws() "]" ws() {
-			Program::Sequence(Box::from(l))
+		rule lop()      -> Command = ws() "["  ws() l:(inc() / dec() / shift() / unshift() / input() / output() / lop())+ ws() "]" ws() {
+			Command::Loop(Box::from(l))
 		}
 
-		pub rule program() -> Program = ws() p:(command() / lop())+ ws() { Program::Program(Box::from(p)) }
+		rule command()  -> Command = ws() c:(inc() / dec() / shift() / unshift() / input() / output() / lop()) ws() {
+			c
+		}
+
+		pub rule program() -> Program = ws() p:(command())+ ws() { Box::from(p) }
 	}
 }
 
@@ -44,20 +41,20 @@ pub fn parse(input: &str) -> Result<Program, peg::error::ParseError<peg::str::Li
 #[cfg(test)]
 mod tests {
 	use super::parse;
-	use super::{Command, Program};
+	use super::{Command};
 
 	#[test]
 	fn parses() {
 		let input = "+++-[>-.]";
-		let expected = Program::Program(Box::new(vec![
-			Program::Command(Command::Inc(3)),
-			Program::Command(Command::Dec(1)),
-			Program::Sequence(Box::new(vec![
-				Program::Command(Command::Shift(1)),
-				Program::Command(Command::Dec(1)),
-				Program::Command(Command::Output),
+		let expected = Box::new(vec![
+			Command::Inc(3),
+			Command::Dec(1),
+			Command::Loop(Box::new(vec![
+				Command::Shift(1),
+				Command::Dec(1),
+				Command::Output,
 			])),
-		]));
+		]);
 		assert_eq!(Ok(expected), parse(input));
 	}
 }
