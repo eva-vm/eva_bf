@@ -5,7 +5,7 @@ pub fn generate<W: Write>(prog: &Program, buf: &mut W, quiet: bool) -> io::Resul
 	if !quiet {
 		writeln!(
 			buf,
-			";----------------------------------------------------\n \
+			" ;----------------------------------------------------\n \
 			 ;- This code has been generated with eva_bf {:8}-    \n \
 			 ;-                                                  -\n \
 			 ;- Authors:                                         -\n \
@@ -31,12 +31,12 @@ pub fn generate<W: Write>(prog: &Program, buf: &mut W, quiet: bool) -> io::Resul
 #[allow(dead_code)]
 fn calc_offset(prog: &Program) -> usize {
 	fn step(com: &Command) -> usize {
-		match *com {
+		match &*com {
 			Command::Shift(_) 	=> 1,
 			Command::Unshift(_) => 1,
 			Command::Inc(_) 	=> 3,
 			Command::Dec(_) 	=> 3,
-			Command::Loop(_) 	=> 8,
+			Command::Loop(seq) 	=> 8 + calc_offset(seq),
 			Command::Input 		=> 2,
 			Command::Output 	=> 2,
 		}

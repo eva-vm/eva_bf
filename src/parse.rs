@@ -4,12 +4,12 @@ pub enum Command {
 	Dec(usize),
 	Shift(usize),
 	Unshift(usize),
-	Loop(Box<Vec<Command>>),
+	Loop(Vec<Command>),
 	Input,
 	Output,
 }
 
-pub type Program = Box<Vec<Command>>;
+pub type Program = Vec<Command>;
 
 peg::parser! {
 	grammar brainfuck() for str {
@@ -23,14 +23,14 @@ peg::parser! {
 		rule output()   -> Command = "." {Command::Output}
 
 		rule lop()      -> Command = ws() "["  ws() l:(inc() / dec() / shift() / unshift() / input() / output() / lop())+ ws() "]" ws() {
-			Command::Loop(Box::from(l))
+			Command::Loop(l)
 		}
 
 		rule command()  -> Command = ws() c:(inc() / dec() / shift() / unshift() / input() / output() / lop()) ws() {
 			c
 		}
 
-		pub rule program() -> Program = ws() p:(command())+ ws() { Box::from(p) }
+		pub rule program() -> Program = ws() p:(command())+ ws() { p }
 	}
 }
 
@@ -46,15 +46,15 @@ mod tests {
 	#[test]
 	fn parses() {
 		let input = "+++-[>-.]";
-		let expected = Box::new(vec![
+		let expected = vec![
 			Command::Inc(3),
 			Command::Dec(1),
-			Command::Loop(Box::new(vec![
+			Command::Loop(vec![
 				Command::Shift(1),
 				Command::Dec(1),
 				Command::Output,
-			])),
-		]);
+			]),
+		];
 		assert_eq!(Ok(expected), parse(input));
 	}
 }
