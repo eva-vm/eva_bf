@@ -10,7 +10,7 @@ pub fn parse(input: &str) -> Result<parse::Program, peg::error::ParseError<peg::
 }
 
 pub fn generate<W: Write>(
-	input: &parse::Program,
+	input: parse::Program,
 	output: &mut W,
 	quiet: bool,
 ) -> std::io::Result<usize> {
