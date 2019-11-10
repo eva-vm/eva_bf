@@ -6,6 +6,9 @@ edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[lib]
+bench = false # Prevent libtest from benchmarking library
+
 [dependencies]
 evasm = {git = "https://github.com/solarliner/rs-evasm", tag = "0.2.1"}
 clap = "2.33.0"
@@ -16,8 +19,9 @@ wbuf = "0.1.1"
 criterion = "0.3.0"
 
 [[bin]]
-path = "src/bin/main.rs"
 name = "evabf"
+path = "src/bin/main.rs"
+bench = false # Prevent libtest from benchmarking library
 
 [[bench]]
 name = "parse"
