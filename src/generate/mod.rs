@@ -3,7 +3,7 @@ use std::io::{self, Write};
 
 mod optimizations;
 
-pub fn generate<W: Write>(prog: &Program, buf: &mut W, quiet: bool) -> io::Result<usize> {
+pub fn generate<W: Write>(prog: Program, buf: &mut W, quiet: bool) -> io::Result<usize> {
 	if !quiet {
 		writeln!(
 			buf,
@@ -27,7 +27,7 @@ pub fn generate<W: Write>(prog: &Program, buf: &mut W, quiet: bool) -> io::Resul
 	if !quiet {
 		writeln!(buf, "\n; Main program")?;
 	}
-	generate_code(prog, buf)
+	generate_code(optimizations::combine_increment_decrement(prog), buf)
 }
 
 #[allow(dead_code)]
@@ -47,15 +47,15 @@ fn calc_offset(prog: &Program) -> usize {
 	prog.iter().map(step).fold(0, |acc, v| acc + v)
 }
 
-fn generate_code<W: Write>(prog: &Program, buf: &mut W) -> io::Result<usize> {
+fn generate_code<W: Write>(prog: Program, buf: &mut W) -> io::Result<usize> {
 	let mut nlabels = 0usize;
-	for c in prog.iter() {
+	for c in prog {
 		nlabels += write_asm_for_command(c, buf, nlabels)?;
 	}
 	Ok(nlabels)
 }
 
-fn write_asm_for_command<W: Write>(cmd: &Command, buf: &mut W, i: usize) -> io::Result<usize> {
+fn write_asm_for_command<W: Write>(cmd: Command, buf: &mut W, i: usize) -> io::Result<usize> {
 	match cmd {
 		Command::Inc(n) => {
 			writeln!(buf, "\tLDR\tR1, [R0]")?;
@@ -96,7 +96,7 @@ fn write_asm_for_command<W: Write>(cmd: &Command, buf: &mut W, i: usize) -> io::
 			writeln!(buf, "\tMOV\tR1, {}", label_out)?;
 			writeln!(buf, "\tBEQ\tR1")?;
 			writeln!(buf, "\n{}:", label)?;
-			for p in seq.iter() {
+			for p in seq {
 				nlabels += write_asm_for_command(p, buf, i + nlabels)?;
 			}
 			writeln!(buf, "\tLDR\tR1, [R0]")?;

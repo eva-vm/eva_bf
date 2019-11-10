@@ -49,7 +49,7 @@ fn main() {
 						parse(&inbuf).map_err(|err| format!("Couldn't parse input: {}", err))
 					})
 					.and_then(|ast| {
-						generate(&ast, &mut output, matches.is_present("quiet"))
+						generate(ast, &mut output, matches.is_present("quiet"))
 							.map_err(|err| format!("Couldn't generate assembly: {}", err))
 					});
 				match res {
@@ -75,7 +75,7 @@ fn main() {
 							.map_err(|err| format!("Couldn't parse input: {}", err))
 					})
 					.and_then(|ast| {
-						evabf::generate(&ast, &mut temp_asm, true)
+						evabf::generate(ast, &mut temp_asm, true)
 							.map_err(|err| format!("Couldn't generate assembly: {}", err))
 					})
 					.and_then(|_| {
