@@ -88,7 +88,6 @@ fn main() {
 							.map_err(|e| format!("ASM read error: {}", e))
 					})
 					.and_then(|_| {
-						println!("Debug: temp_asm\n{}", input_buffer);
 						evasm::assemble(&input_buffer, &mut output)
 							.map_err(|e| format!("Couldn't assemble: {}", e))
 					});
