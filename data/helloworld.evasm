@@ -9,7 +9,7 @@
 
 ; Data pointer initialisation
 
-	MOV	R0, #137
+	MOV	R0, #142
 
 ; Main program
 	LDR	R1, [R0]
@@ -156,3 +156,4 @@ label_0_out:
 	STR	R1, [R0]
 	LDR	R1, [R0]
 	OUT	R1
+1

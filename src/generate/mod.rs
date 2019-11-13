@@ -18,19 +18,17 @@ pub fn generate<W: Write>(prog: Program, buf: &mut W, quiet: bool) -> io::Result
 			crate::VERSION.unwrap_or("unstable")
 		)?;
 	}
-	// let offset = calc_offset(prog);
-	let offset = 15000; // Constant offset in memory
+	let offset = calc_offset(&prog);
 	if !quiet {
 		writeln!(buf, "; Data pointer initialisation\n")?;
 	}
-	writeln!(buf, "\tMOV\tR0, #{}", offset)?;
+	writeln!(buf, "\tMOV\tR0, #{}", offset + 10)?;
 	if !quiet {
 		writeln!(buf, "\n; Main program")?;
 	}
 	generate_code(optimizations::combine_increment_decrement(prog), buf)
 }
 
-#[allow(dead_code)]
 fn calc_offset(prog: &Program) -> usize {
 	#[rustfmt::skip]
 	fn step(com: &Command) -> usize {
